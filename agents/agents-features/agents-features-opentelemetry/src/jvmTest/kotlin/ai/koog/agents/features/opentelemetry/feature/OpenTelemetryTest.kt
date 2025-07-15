@@ -16,10 +16,7 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.datetime.Clock
 import org.junit.jupiter.api.Test
 import java.util.*
-import kotlin.test.assertContentEquals
-import kotlin.test.assertEquals
-import kotlin.test.assertNotNull
-import kotlin.test.assertTrue
+import kotlin.test.*
 
 /**
  * Tests for the OpenTelemetry feature.
@@ -109,7 +106,7 @@ class OpenTelemetryTest {
     fun `test spans are created for agent with one llm call`() = runBlocking {
         MockSpanExporter().use { mockExporter ->
 
-            val userPrompt = "What's the weather in Paris?"
+            val userPrompt = "What's the PII weather in Paris?"
             val agentId = "test-agent-id"
             val promptId = "test-prompt-id"
             val testClock = Clock.System
@@ -123,7 +120,7 @@ class OpenTelemetryTest {
                 edge(nodeSendInput forwardTo nodeFinish onAssistantMessage { true })
             }
 
-            val mockResponse = "The weather in Paris is rainy and overcast, with temperatures around 57°F"
+            val mockResponse = "The PII weather in Paris is rainy and overcast, with temperatures around 57°F"
 
             val mockExecutor = getMockExecutor(clock = testClock) {
                 mockLLMAnswer(mockResponse) onRequestEquals userPrompt
@@ -594,8 +591,8 @@ class OpenTelemetryTest {
     fun `test spans for agent with tool call and verbose level set to false`() = runBlocking {
         MockSpanExporter().use { mockExporter ->
 
-            val userPrompt = "What's the weather in Paris?"
-            val mockResponse = "The weather in Paris is rainy and overcast, with temperatures around 57°F"
+            val userPrompt = "What's the PII weather in Paris?"
+            val mockResponse = "The PII weather in Paris is rainy and overcast, with temperatures around 57°F"
 
             val agentId = "test-agent-id"
             val promptId = "test-prompt-id"
@@ -621,8 +618,8 @@ class OpenTelemetryTest {
             }
 
             val mockExecutor = getMockExecutor(clock = testClock) {
-                mockLLMToolCall(TestGetWeatherTool, TestGetWeatherTool.Args("Paris")) onRequestEquals userPrompt
-                mockLLMAnswer(mockResponse) onRequestContains "57°F"
+                mockLLMToolCall(TestGetWeatherTool, TestGetWeatherTool.Args("PII Paris")) onRequestEquals userPrompt
+                mockLLMAnswer(mockResponse) onRequestContains "PII 57°F"
             }
 
             val agent = createAgent(
@@ -759,6 +756,7 @@ class OpenTelemetryTest {
             )
 
             assertSpans(expectedSpans, collectedSpans)
+            assertNoPIIInSpans(collectedSpans)
         }
     }
 
@@ -928,6 +926,23 @@ class OpenTelemetryTest {
             }
 
             assertEventsForSpan(spanName, expectedEvents, actualEvents)
+        }
+    }
+
+    private fun assertNoPIIInSpans(actualSpans: List<SpanData>) {
+        // Span attributes + events
+        actualSpans.forEachIndexed { index, actualSpan ->
+
+            val spanName = actualSpan.name
+
+            // Attributes
+            actualSpan.attributes.asMap().asSequence().forEach {
+                val containsPII = it.value.toString().contains("PII")
+                    assertFalse(
+                        message = "Span `$spanName` attribute `${it.key}` may not contain PII",
+                        actual = containsPII
+                    )
+            }
         }
     }
 

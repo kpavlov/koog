@@ -3,8 +3,10 @@ package ai.koog.agents.features.opentelemetry.event
 import io.github.oshai.kotlinlogging.KotlinLogging
 
 /**
- * Represents an abstract field to be included in an event's body. Each field is characterized
- * by a unique key and an associated value, and optionally marked as verbose for additional significance.
+ * Represents an abstract field to be included in an event's body.
+ *
+ * Each field is characterized by a unique _key_ and an associated _value_,
+ * and, optionally, is marked as _sensitive_ if it might contain sensitive/PII information.
  */
 internal abstract class EventBodyField {
 
@@ -15,6 +17,14 @@ internal abstract class EventBodyField {
     abstract val key: String
 
     abstract val value: Any
+
+    /**
+     * Indicates whether the field contains sensitive information.
+     *
+     * If set to `true`, this field's contents should be treated with additional care,
+     * such as masking or avoiding logging, to ensure privacy and security.
+     */
+    abstract val sensitive: Boolean
 
     val valueString: String
         get() = convertValueToString(key, value)

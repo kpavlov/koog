@@ -22,7 +22,6 @@ internal data class AssistantMessageEvent(
             add(EventBodyFields.Role(role = message.role))
         }
 
-
         when (message) {
             is Message.Assistant -> {
                 if (verbose) {

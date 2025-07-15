@@ -4,6 +4,7 @@ import ai.koog.agents.features.opentelemetry.event.EventBodyField
 
 internal class MockEventBodyField(
     override val key: String,
-    override val value: Any
+    override val value: Any,
+    override val sensitive: Boolean = false
 ) : EventBodyField()
 

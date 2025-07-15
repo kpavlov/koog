@@ -21,26 +21,31 @@ internal object EventBodyFields {
                     }
                 }
             }
+        override val sensitive: Boolean = true
     }
 
     data class Content(private val content: String) : EventBodyField() {
         override val key: String = "content"
         override val value: String = content
+        override val sensitive: Boolean = true
     }
 
     data class Role(private val role: ai.koog.prompt.message.Message.Role) : EventBodyField() {
         override val key: String = "role"
         override val value: String = role.name.lowercase()
+        override val sensitive: Boolean = false
     }
 
     data class Index(private val index: Int) : EventBodyField() {
         override val key: String = "index"
         override val value: Int = index
+        override val sensitive: Boolean = false
     }
 
     data class FinishReason(private val reason: String) : EventBodyField() {
         override val key: String = "finish_reason"
         override val value: String = reason
+        override val sensitive: Boolean = false
     }
 
     data class Message(private val role: ai.koog.prompt.message.Message.Role?, private val content: String) :
@@ -50,10 +55,12 @@ internal object EventBodyFields {
             role?.let { role -> put("role", role.name.lowercase()) }
             put("content", content)
         }
+        override val sensitive: Boolean = true
     }
 
     data class Id(private val id: String) : EventBodyField() {
         override val key: String = "id"
         override val value: String = id
+        override val sensitive: Boolean = false
     }
 }
