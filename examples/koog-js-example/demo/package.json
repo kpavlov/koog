@@ -12,6 +12,6 @@
   "dependencies": {
     "@js-joda/core": "3.2.0",
     "koogelis": "file:koogelis-0.0.1.tgz",
-    "ws": "8.18.0"
+    "ws": "8.20.1"
   }
 }
